@@ -1,37 +1,17 @@
-
 <?php
 
 $master ="Операции со своими крокодилами";
 
-?>
-<?
-
 include("header.php");
-
-?>
-
-<?
 
 include("footer.php");
 
-?>
-
-<?php
-
-if ($master == "Операции со своими крокодилами")
-{
-
+if ($master == "Операции со своими крокодилами") {
     echo "<p>Распоряжение своими крокодилами</p>";
-
-}
-
-else
-
-{
-
+} else {
     echo "<p><a href=\"file2.php\" title=\"Операции со своими крокодилами\">Распоряжение своими крокодилами</a></p>";
-
 }
+
 
 define('MAX_UPLOADED_SIZE', 30000);
 
@@ -71,6 +51,46 @@ if (!empty($_FILES)) {
         echo 'Error: can`t move temporary file: ' . $_FILES['fname1']['tmp_name'] . ' to file on server: ' . $fullGalleryPath . $_FILES['fname1']['name'];
         exit;
     }
+}
+
+
+if (!empty($_POST)) {
+    if (isset($_POST['new_gallery'])) {
+        $newDirPath = $baseGalleryPath . DIRECTORY_SEPARATOR . $_POST['new_gallery'];
+        if (! is_dir($newDirPath)) {
+            if (mkdir($newDirPath)) {
+                echo 'Created new direcotry ' . $newDirPath . '<br>';
+                exit;
+            } else {
+                echo 'Error creating new direcotry ' . $newDirPath . '<br>';
+                exit;
+            }
+        } else {
+            echo 'Folder ' . $newDirPath . ' already exists!<br>';
+            exit;
+        }
+    }
+}
+
+
+function getUploadSubdirs() {
+    global $baseGalleryPath;
+
+    $resHtml = '<select name="gallery">';
+    $dh = opendir($baseGalleryPath);
+    if ($dh) {
+        while (false !== ($dirEntry = readdir($dh))) {
+            if ($dirEntry !== '.' && $dirEntry !== '..') {
+                if (is_dir($baseGalleryPath . DIRECTORY_SEPARATOR . $dirEntry)) {
+                    $resHtml .= '<option value="' . $dirEntry . '">' . $dirEntry . '</option>';
+                }
+            }
+        }
+        closedir($dh);
+    }
+    $resHtml .= '</select>';
+
+    return $resHtml;
 }
 
 function readDirectoryImages($folder) {
@@ -147,14 +167,20 @@ function readGalleries() {
     <a href="file4.php" title="Скорая помощь клиенту">Кто-нибудь сделайте что-нибудь</a></h3>
 
 <h3 align="center"><a href="orderescort.php" title=""><span class="letter">К</span>рокодильная <span class="letter">Г</span>аллерея</a></h3>
-
+<hr>
+<form method="post" action="">
+    <div><label>Gallery Name:</label> <input type="text" name="new_gallery" value="" placeholder="Input gallery subfolder here..."></div>
+    <div><input type="submit" value="Создать подпапку"></div>
+</form>
+<hr>
 <form method="post" action="" enctype="multipart/form-data">
     <div align="center"><label for="fname1">Выберите картинку для загрузки *: </label><input required type="file" name="fname1"></div>
     <div align="center">
-        <select name=\"gallery\">
-            <option value=\"gallery1\">gallery1</option>
-            <option value=\"gallery2\">gallery2</option>
-        </select>
+        <!-- select name="gallery">
+            <option value="gallery1">gallery1</option>
+            <option value="gallery2">gallery2</option>
+        </select -->
+        <?=getUploadSubdirs()?>
     </div>
     <div align="center">
 
